@@ -7,13 +7,11 @@ import java.util.Map;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.servlet.http.HttpSession;
 import kr.co.kosmo.project_back.recommendation.dto.RecommendationResponseDto;
 import kr.co.kosmo.project_back.recommendation.service.RecommendationService;
-import kr.co.kosmo.project_back.user.dto.UserDto;
 import lombok.RequiredArgsConstructor;
 
 @RestController
