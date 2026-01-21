@@ -7,6 +7,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import kr.co.kosmo.project_back.address.mapper.AddressMapper;
+import kr.co.kosmo.project_back.alarm.dto.AlarmDto;
+import kr.co.kosmo.project_back.alarm.mapper.AlarmMapper;
+import kr.co.kosmo.project_back.alarm.service.AlarmService;
 import kr.co.kosmo.project_back.cart.dto.CartDto;
 import kr.co.kosmo.project_back.cart.mapper.CartMapper;
 import kr.co.kosmo.project_back.order.dto.OrderRequestDto;
@@ -21,7 +24,9 @@ public class OrderService {
     private final OrderMapper orderMapper;
     private final CartMapper cartMapper;
     private final AddressMapper addressMapper;
-
+    private final AlarmService alarmService; // 알림 서비스 주입 추가
+    private final AlarmMapper alarmMapper;
+    
     // 주문 생성
     @Transactional
     public Integer order(OrderRequestDto dto) {
@@ -53,8 +58,69 @@ public class OrderService {
                 cartMapper.deleteCartItem(dto.getUserId(), item.getProductId());
             }
         }
+
+        // ✅ [추가] 주문 완료 알림 생성 트리거
+        // 주문 성공 후 DB에 알림 데이터를 쌓습니다.
+        try {
+            String orderNo = "ORD-" + String.format("%03d", orderId);
+            alarmService.insertOrderAlarm(dto.getUserId(), orderNo);
+        } catch (Exception e) {
+            // 알림 생성 실패가 주문 전체의 롤백으로 이어지지 않도록 예외 처리만 수행
+            System.err.println("알림 생성 실패: " + e.getMessage());
+        }
         return orderId;
     }  
+
+    @Transactional
+    public void updateStatus(Integer orderId, String newStatus) {
+        OrderResponseDto order = orderMapper.findOrderById(orderId);
+
+        if (order == null) return;
+
+        String orderNo = "ORD-" + String.format("%03d", orderId);
+
+        
+        // 상태 업데이트
+        orderMapper.updateOrderStatus(orderId, newStatus);
+
+        int duplicateCount = orderMapper.checkDuplicateAlarm(order.getUserId(), orderNo, newStatus);
+        
+        // 중복이 아닐 때만 알림 생성
+        if (duplicateCount == 0) {
+            AlarmDto alarm = new AlarmDto();
+            alarm.setUserId(order.getUserId());
+            
+            // 상태별로 타입을 세분화하거나, 타입은 DELIVERY로 두되 메시지를 다르게 구성
+            alarm.setType("DELIVERY"); 
+            
+            String statusMsg = "";
+            switch(newStatus) {
+                case "결제 완료": 
+                    statusMsg = "결제가 정상적으로 완료되었습니다."; 
+                    break;
+                case "상품 준비중": 
+                    statusMsg = "상품 준비를 시작했습니다."; 
+                    break;
+                case "배송 중": 
+                    statusMsg = "상품 배송이 시작되었습니다. 조금만 기다려주세요!"; 
+                    break;
+                case "배송 완료": 
+                    statusMsg = "배송이 완료되었습니다. 상품은 만족스러우신가요?"; 
+                    break;
+                case "주문 취소": 
+                    statusMsg = "주문이 취소되었습니다. 이용해 주셔서 감사합니다."; 
+                    break;
+                default: 
+                    statusMsg = "주문 상태가 [" + newStatus + "]로 변경되었습니다.";
+            }
+            
+            alarm.setMessage(String.format("[%s] %s", orderNo, statusMsg));
+            
+            alarmMapper.insertAlarm(alarm);
+        }
+    }
+
+
     // 구매목록 조회(페이징)
     public Map<String, Object> getOrderList(OrderSearchDto searchDto) {
         // 전체 주문 개수
@@ -72,7 +138,7 @@ public class OrderService {
                 Map<String, Object> m = new java.util.HashMap<>();
                 m.put("id", "ORD-" + String.format("%03d", o.getOrderId()));
                 m.put("totalPrice", o.getTotalPrice());
-                m.put("status", "결제 완료");
+                m.put("status", o.getStatus());
                 m.put("orderDate", o.getCreatedAt());
 
                 List<CartDto> items = 
@@ -131,7 +197,7 @@ public class OrderService {
                 Map<String, Object> m = new java.util.HashMap<>();
                 m.put("id", "ORD-" + String.format("%03d", o.getOrderId()));
                 m.put("totalPrice", o.getTotalPrice());
-                m.put("status", "결제 완료");
+                m.put("status", o.getStatus());
                 m.put("orderDate", o.getCreatedAt());
 
                 List<CartDto> items = 

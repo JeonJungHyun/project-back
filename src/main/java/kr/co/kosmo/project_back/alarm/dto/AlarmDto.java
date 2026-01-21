@@ -8,10 +8,12 @@ import lombok.Setter;
 @Getter
 @Setter
 public class AlarmDto {
+
     private Integer id;
     private Integer userId;
     private String type;
     private String message;
+
     private Boolean isRead;
     private LocalDateTime createdAt;
 }

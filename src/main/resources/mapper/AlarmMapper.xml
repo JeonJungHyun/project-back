@@ -16,10 +16,9 @@
             message,
             is_read     AS isRead,
             created_at  AS createdAt
-        FROM Bg_Alarm 
-        WHERE user_id = #{userId} 
+        FROM Bg_Alarm
+        WHERE user_id = #{userId}
         ORDER BY id DESC
-    </select>
 
     <!-- 알림 삭제 -->
     <delete id="deleteAlarm" parameterType="int">
