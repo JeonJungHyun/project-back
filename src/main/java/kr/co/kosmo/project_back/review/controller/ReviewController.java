@@ -34,8 +34,8 @@ public class ReviewController {
     @GetMapping("/{productId}/reviews")
     public ResponseEntity<List<ReviewResponseDto>> getReviews(
         @PathVariable Integer productId,
-        @RequestParam(required = false) String sort 
-    ) {
+        @RequestParam(required = false) String sort) {
+            // 정렬을 선택하지 않아도 결과를 보고 싶을때 사용
         return ResponseEntity.ok(
             reviewService.getReviewsByProduct(productId, sort)
         );
@@ -45,7 +45,8 @@ public class ReviewController {
     @PostMapping(value = "/{productId}/reviews", consumes = "multipart/form-data")
     public ResponseEntity<ReviewCreateResponseDto> insertReview(
         @PathVariable Integer productId,
-        @ModelAttribute ReviewRequestDto dto,
+        @ModelAttribute ReviewRequestDto dto,   
+        // 이미지 파일이 포함되므로 json 기반의 @RequestBody로 받을 수 없음
         HttpSession session
     ) {
         Integer userId = (Integer) session.getAttribute("LOGIN_USER");
@@ -91,8 +92,7 @@ public class ReviewController {
     public ResponseEntity<Void> updateReview(
         @PathVariable Integer productId,
         @PathVariable Long reviewId,
-        @RequestBody ReviewRequestDto dto
-    ) {
+        @RequestBody ReviewRequestDto dto) {
         reviewService.updateReview(reviewId, dto);
         return ResponseEntity.noContent().build();
     }
@@ -101,9 +101,11 @@ public class ReviewController {
     @DeleteMapping("/{productId}/reviews/{reviewId}")
     public ResponseEntity<Void> deleteReview(
         @PathVariable Integer productId,
-        @PathVariable Long reviewId
-    ) {
+        @PathVariable Long reviewId) {
         reviewService.deleteReview(reviewId);
         return ResponseEntity.noContent().build();
     }
 }
+
+
+// 상품별 리뷰 조회 

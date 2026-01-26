@@ -20,13 +20,12 @@ public class AuthService {
     private final UserMapper userMapper;
     private final HttpSession session;
     private final MailService mailService;
-    
 
     public UserDto login(LoginRequestDto dto) {
         // 로그인 아이디로 회원 조회
         UserDto user = userMapper.selectByLoginId(dto.getLoginId());
         // 아이디 없으면 에러
-        if( user == null ) return null;
+        if(user == null) return null;
         // 비번 틀려도 에러
         if(!dto.getPassword().equals(user.getPassword())) {
             return null;
@@ -177,7 +176,6 @@ public class AuthService {
         session.removeAttribute("EMAIL_AUTH_SUCCESS");
      }
 }
-
 
 
 // MailService를 호출. 인증번호 생성

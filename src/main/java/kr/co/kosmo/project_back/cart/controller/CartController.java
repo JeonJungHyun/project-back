@@ -26,6 +26,7 @@ public class CartController {
     // 장바구니 조회
     @GetMapping
     public Map<String, Object> getCartList(HttpSession session) {
+        // 목록 데이터와 계산된 총 금액을 함께 내려줘야 하니까 Map으로 반환
         Integer userId = (Integer) session.getAttribute("LOGIN_USER");
         if(userId == null) {
             throw new IllegalStateException("로그인이 필요합니다.");
@@ -34,13 +35,11 @@ public class CartController {
         List<CartDto> cartItems = cartService.getCartList(userId);
         
         // 장바구니 총 금액 계산
-        int totalPrice = cartItems.stream()
+        int totalPrice = cartItems.stream()  // 리스트를 하나씩 흘려보내며 계산한다
             .mapToInt(item -> (int) item.getPrice() * (int) item.getQuantity())
+            // 각 장바구니 상품을 가격으로 변환하는 단계
             .sum();
-        return Map.of(
-                "cartItems", cartItems,
-                "totalPrice", totalPrice
-        );
+        return Map.of("cartItems", cartItems, "totalPrice", totalPrice);
     }
     // 장바구니 추가
     @PostMapping
@@ -64,12 +63,7 @@ public class CartController {
         if (userId == null) {
             throw new IllegalStateException("로그인이 필요합니다.");
         }
-
-        cartService.updateCartItem(
-            userId,
-            cartId,
-            body.get("quantity")
-        );
+        cartService.updateCartItem(userId, cartId, body.get("quantity"));
         return Map.of(
             "message", "장바구니에 수량 수정됨",
             "cartItemId", cartId);
@@ -78,8 +72,7 @@ public class CartController {
     @DeleteMapping("/{productId}")
     public Map<String, Object> removeCartItem(
             @PathVariable Integer productId,
-            HttpSession session
-    ) {
+            HttpSession session) {
         Integer userId = (Integer) session.getAttribute("LOGIN_USER");
         if(userId == null) {
             throw new IllegalStateException("로그인이 필요합니다.");

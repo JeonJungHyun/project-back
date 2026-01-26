@@ -202,8 +202,7 @@ public class OrderService {
 
     // 마이페이지 주문 조회
     public Map<String, Object> getOrderListByUserId(Integer userId) {
-        List<OrderResponseDto> orders = 
-            orderMapper.findOrderListByUserId(userId);
+        List<OrderResponseDto> orders = orderMapper.findOrderListByUserId(userId);
         List<Map<String, Object>> orderList = orders.stream()
             .map(o -> {
                 Map<String, Object> m = new java.util.HashMap<>();
@@ -212,12 +211,12 @@ public class OrderService {
                 m.put("status", o.getStatus());
                 m.put("orderDate", o.getCreatedAt());
 
-                List<CartDto> items = 
-                    orderMapper.findOrderItemsByOrderId(o.getOrderId());
+                List<CartDto> items = orderMapper.findOrderItemsByOrderId(o.getOrderId());
                 m.put("orderItems", items);
                 return m;
             })
             .toList();
+
             return Map.of(
                 "orders", orderList,
                 "pagination", Map.of(

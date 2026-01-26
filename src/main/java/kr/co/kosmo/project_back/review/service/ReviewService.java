@@ -30,8 +30,7 @@ public class ReviewService {
     // 상품별 리뷰 목록 조회
     public List<ReviewResponseDto> getReviewsByProduct(Integer productId, String sort) {
         // 리뷰 목록 조회
-        List<ReviewResponseDto> reviews = 
-            reviewMapper.findReviewsByProductId(productId, sort);
+        List<ReviewResponseDto> reviews = reviewMapper.findReviewsByProductId(productId, sort);
         // 각 리뷰에 이미지 목록 붙이기
         for (ReviewResponseDto review : reviews) {
             review.setReviewImages(
@@ -45,9 +44,7 @@ public class ReviewService {
     public Long insertReview(ReviewRequestDto dto) {
 
         // 구매 여부 확인
-        int count = orderMapper.countCompletedOrder(
-                dto.getUserId(),
-                dto.getProductId());
+        int count = orderMapper.countCompletedOrder(dto.getUserId(), dto.getProductId());
 
         if(count == 0) {
             throw new IllegalStateException("구매확정 후 리뷰를 작성할 수 있습니다.");
@@ -58,8 +55,8 @@ public class ReviewService {
 
         // 이미지 파일 저장 + DB 저장
         if(dto.getImages() != null && !dto.getImages().isEmpty()) {
-            for (MultipartFile file : dto.getImages()) {
-                if (file.isEmpty()) continue;
+            for(MultipartFile file : dto.getImages()) {
+                if(file.isEmpty()) continue;
 
                 String imageUrl = saveReviewImage(file);
                 reviewImageMapper.insertReviewImage(reviewId, imageUrl);

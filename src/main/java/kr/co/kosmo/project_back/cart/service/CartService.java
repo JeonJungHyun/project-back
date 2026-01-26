@@ -29,7 +29,7 @@ public class CartService {
             Integer cartItemId,
             Integer quantity
     ) {
-        Map<String, Object> params = new HashMap<>();
+        Map<String, Object> params = new HashMap<>();   // 여러개의 값을 하나로 묶어서 SQL로 보내기 위함
         params.put("userId", userId);
         params.put("cartItemId", cartItemId);
         params.put("quantity", quantity);
@@ -43,6 +43,4 @@ public class CartService {
     public void removeCart(Integer userId) {
         cartMapper.deleteCart(userId);
     }
-
 }
-

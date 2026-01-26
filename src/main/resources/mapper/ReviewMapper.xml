@@ -107,8 +107,7 @@
 
     </resultMap>
 
-    <select id="findReviewsByUserId"
-            resultMap="MyReviewResultMap">
+    <select id="findReviewsByUserId" resultMap="MyReviewResultMap">
 
         SELECT
             r.id                AS review_id,

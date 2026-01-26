@@ -33,8 +33,7 @@ public class ProductController {
     @GetMapping("/{productId}")
     public ResponseEntity<ProductDto> getProduct(
         @PathVariable Integer productId, // URL 속 값을 꺼내 쓰기 위함
-        HttpSession session
-    ) {
+        HttpSession session) {
         ProductDto product = productService.getProduct(productId);
         // 로그인 된 사용자만 최근 본 상품 저장
         Integer userId = (Integer) session.getAttribute("LOGIN_USER");
@@ -48,6 +47,7 @@ public class ProductController {
     @GetMapping
     public PageResponseDto<ProductDto> searchProducts(
         @ModelAttribute ProductSearchDto searchDto, HttpSession session) {
+            // 여러 검색, 페이징 조건을 하나의 객체로 묶어서 받기 위헤 model 사용
         // 페이지 값이 없거나 0 이하로 들어오면 기본값으로 돌림
         if(searchDto.getPage() == null || searchDto.getPage() <= 0) {
             searchDto.setPage(1);
@@ -57,8 +57,7 @@ public class ProductController {
             searchDto.setSize(10);
         }
         // 최근검색어 화면에 응답
-        List<String> recentKeywords =
-            (List<String>) session.getAttribute("recentKeywords");
+        List<String> recentKeywords = (List<String>) session.getAttribute("recentKeywords");
         if(recentKeywords == null) {
             recentKeywords = new ArrayList<>();
         }
@@ -71,8 +70,7 @@ public class ProductController {
             session.setAttribute("recentKeywords", recentKeywords);
             }
         // 상품검색
-        PageResponseDto<ProductDto> response = 
-            productService.searchProducts(searchDto);
+        PageResponseDto<ProductDto> response = productService.searchProducts(searchDto);
         // 최근검색어 응답
         response.setRecentKeywords(recentKeywords);
         return response;
@@ -97,5 +95,4 @@ public class ProductController {
     public ResponseEntity<List<ProductDto>> getTopViewProducts() {
         return ResponseEntity.ok(productService.getTopViewProducts());
     }
-
 }

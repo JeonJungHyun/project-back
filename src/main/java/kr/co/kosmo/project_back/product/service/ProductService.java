@@ -32,24 +32,19 @@ public class ProductService {
         // 현재 페이지 목록
 
         List<ProductDto> list = productMapper.findProductList(searchDto);
-        // ✅ 목록 전체 경로 보정 추가
-        list.forEach(this::formatProductImageUrl);
+        list.forEach(this::formatProductImageUrl);  // DB에서 조회한 이미지 경로를 프론트 응답용 전체 URL로 변환
 
         // 페이지 응답으로 묶음
-        return PageResponseDto.of(
-            list,
-            totalCount,
-            searchDto.getPage(),
-            searchDto.getSize()
-        );
+        return PageResponseDto.of(list, totalCount, searchDto.getPage(), searchDto.getSize());
     }
 
-    // ✅ 이미지 경로 보정 함수 (AdminProductService와 동일한 로직 유지)
+    // 여러 형태의 DB 속 이미지 경로를 통일해주는 로직
     private void formatProductImageUrl(ProductDto product) {
         String url = product.getImageUrl();
 
         if (url == null || url.isEmpty() || url.startsWith("http") || url.startsWith("/uploads/")) {
             return;
+
         }
         
         String resultUrl;
@@ -57,12 +52,12 @@ public class ProductService {
         // 기존 데이터 및 신규 날짜형 데이터 모두 대응
         if (url.startsWith("product/")) {
             resultUrl = "/uploads/" + url;
+
         } else {
             resultUrl = "/uploads/product/" + url;
         }
         product.setImageUrl(resultUrl.replace(" ", "%20"));
     }
-
 
     // 인기 검색어 
     public List<String> getPopularKeywords() {

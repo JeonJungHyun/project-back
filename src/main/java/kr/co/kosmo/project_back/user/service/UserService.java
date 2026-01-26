@@ -28,19 +28,19 @@ import kr.co.kosmo.project_back.wishlist.mapper.WishlistMapper;
 @Service
 @RequiredArgsConstructor
 public class UserService {
-   private final UserMapper userMapper;
-   private final AddressMapper addressMapper;
-   private final ReviewMapper reviewMapper;
-   private final ReviewImageMapper reviewImageMapper;
-   private final QuestionMapper questionMapper;
-   private final QuestionImageMapper questionImageMapper;
-   private final WishlistMapper wishlistMapper;
-   private final CartMapper cartMapper;
-   private final RecentProductMapper recentProductMapper;
-   private final UserSelectedCategoryMapper userSelectedCategoryMapper;
+    private final UserMapper userMapper;
+    private final AddressMapper addressMapper;
+    private final ReviewMapper reviewMapper;
+    private final ReviewImageMapper reviewImageMapper;
+    private final QuestionMapper questionMapper;
+    private final QuestionImageMapper questionImageMapper;
+    private final WishlistMapper wishlistMapper;
+    private final CartMapper cartMapper;
+    private final RecentProductMapper recentProductMapper;
+    private final UserSelectedCategoryMapper userSelectedCategoryMapper;
 
-   @Transactional       // 회원저장 + 관심분야 저장 + 주소저장 = 하나의 회원가입으로 묶음 
-   public Integer join(UserJoinDto dto, HttpServletRequest request) {
+    @Transactional       // 회원저장 + 관심분야 저장 + 주소저장 = 하나의 회원가입으로 묶음 
+    public Integer join(UserJoinDto dto, HttpServletRequest request) {
         HttpSession session = request.getSession(false);
         // 이메일 인증 여부 확인
         if(session == null) {
@@ -56,7 +56,7 @@ public class UserService {
             throw new IllegalStateException("이메일을 확인해주세요.");
         }
 
-        // // 아이디 중복 체크 시작
+        // 아이디 중복 체크 시작
         if( userMapper.existsByLoginId(dto.getLoginId()) > 0 ) {
             throw new IllegalStateException( "이미 존재하는 아이디입니다." );
         }
@@ -79,12 +79,12 @@ public class UserService {
         addressMapper.insertAddress(address);
 
         return userId;
-   }
-   public boolean isIdDuplicate(String loginId) {
+    }
+    public boolean isIdDuplicate(String loginId) {
        return userMapper.existsByLoginId(loginId) > 0;
-   }
+    }
 
-   public UserDto getUserInfo(Integer userId) {
+    public UserDto getUserInfo(Integer userId) {
     // 유저 기본 정보 조회
     UserDto userDto = userMapper.selectById(userId);
     if(userDto == null) throw new RuntimeException("사용자를 찾을 수 없습니다.");
@@ -93,10 +93,10 @@ public class UserService {
     // UserDto에 조회한 카테고리 리스트 세팅
     userDto.setCategoryIds(categoryIds);
     return userDto;
-   }
+    }
 
-   @Transactional
-   public void updateUserInfo(Integer userId, UserUpdateRequestDto dto) {
+    @Transactional
+    public void updateUserInfo(Integer userId, UserUpdateRequestDto dto) {
         // 이름 / 전화번호 수정
         if(dto.getUserName() != null || dto.getPhone() != null) {
             userMapper.updateUserInfo(userId, dto);
@@ -114,9 +114,9 @@ public class UserService {
         }
     }
     // 비밀번호 변경
-   @Transactional
-   public void changePassword(
-         Integer userId, UserPasswordChangeRequestDto dto) {
+    @Transactional
+    public void changePassword(
+        Integer userId, UserPasswordChangeRequestDto dto) {
     // 사용자 조회
     UserDto user = userMapper.selectById(userId);
     if(user == null) {
@@ -128,10 +128,10 @@ public class UserService {
     }
     // 새 비번 업뎃
     userMapper.updatePasswordByUserId(userId, dto.getNewPassword());
-   }
+    }
    // 회원 탈퇴
-   @Transactional // 회원 탈퇴, 회원 가입 같은 여러 기능이 섞여있을 때 사용
-   public void withdraw(Integer userId) {
+    @Transactional // 회원 탈퇴, 회원 가입 같은 여러 기능이 섞여있을 때 사용
+    public void withdraw(Integer userId) {
     // 리뷰 삭제
     // 리뷰 아이디 목록 조회
     List<Long> reviewIds = reviewMapper.findReviewIdsByUserId(userId);

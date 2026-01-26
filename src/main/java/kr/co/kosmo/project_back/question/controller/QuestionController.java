@@ -30,6 +30,7 @@ public class QuestionController {
             HttpSession session,
             @RequestParam(required = false) String status,
             @RequestParam(required = false) String type
+            // 조회 조건이므로 RequestParam 사용
     ) {
         Integer userId = (Integer) session.getAttribute("LOGIN_USER");    
         if(userId == null) {
@@ -43,6 +44,7 @@ public class QuestionController {
     @PostMapping
     public ResponseEntity<QuestionResponseDto> insertQuestion(
         @ModelAttribute QuestionRequestDto dto,
+        // 문의 작성에는 이미지 파일이 포함되므로 Model을 사용
         HttpSession session
     ) {
         Integer userId = (Integer) session.getAttribute("LOGIN_USER");

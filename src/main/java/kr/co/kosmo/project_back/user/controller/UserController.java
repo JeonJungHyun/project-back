@@ -24,7 +24,8 @@ public class UserController {
 
    // 회원가입 처리하라고 서비스에게 지시
    @PostMapping("/register")
-    public ResponseEntity<?> register(@Valid @RequestBody UserJoinDto dto, HttpServletRequest request) {    // JSON -> DTO로 바꿔서 넣음(바인딩)
+    public ResponseEntity<?> register(@Valid @RequestBody UserJoinDto dto, HttpServletRequest request)
+    {    // JSON -> DTO로 바꿔서 넣음(바인딩)
         try {
             Integer userId = userService.join(dto, request);
 
@@ -51,3 +52,4 @@ public class UserController {
 
 
 // 인증 이후 회원 도메인 전체
+// 행동을 요청한 사람이 누구인지 여부가 아닌, 그 사람의 데이터만 판단하는 곳

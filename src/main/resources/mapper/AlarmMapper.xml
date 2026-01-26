@@ -19,6 +19,7 @@
         FROM Bg_Alarm
         WHERE user_id = #{userId}
         ORDER BY id DESC
+    </select>
 
     <!-- 알림 삭제 -->
     <delete id="deleteAlarm" parameterType="int">
@@ -70,10 +71,5 @@
         WHERE user_id = #{userId} 
             AND is_read = 0 
     </update>
-
-
-
-
-
 
 </mapper>

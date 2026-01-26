@@ -39,4 +39,4 @@ public class UserReviewController {
 }
 
 
-// 내 리뷰 조회
+// 내 리뷰 조회(마이페이지)

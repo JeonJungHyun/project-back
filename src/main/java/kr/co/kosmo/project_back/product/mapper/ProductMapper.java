@@ -10,7 +10,6 @@ import kr.co.kosmo.project_back.product.dto.ProductSearchDto;
 public interface ProductMapper {
     // 상품상세 조회
     ProductDto findByProductId(Integer productId); 
-
     // 상품 가격만 조회
     Integer findPriceByProductId(Integer productId);
     // 상품검색 + 목록
