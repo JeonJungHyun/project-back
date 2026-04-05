@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.kosmo.project_back.admin.mapper.AdminFaqMapper">
+
+    <select id="countFaqList" parameterType="kr.co.kosmo.project_back.admin.dto.FaqSearchDto" resultType="int">
+        SELECT COUNT(*)
+        FROM bg_faq
+        <where>
+            <if test="keyword != null and keyword != ''">
+                AND (title LIKE CONCAT('%', #{keyword}, '%') 
+                     OR content LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+        </where>
+    </select>
+
+    <select id="findFaqList" parameterType="kr.co.kosmo.project_back.admin.dto.FaqSearchDto"
+            resultType="kr.co.kosmo.project_back.admin.dto.FaqDto">
+        SELECT
+            id AS faqId,
+            title,
+            content,
+            created_at AS createdAt,
+            updated_at AS updatedAt
+        FROM bg_faq
+        <where>
+            <if test="keyword != null and keyword != ''">
+                AND (title LIKE CONCAT('%', #{keyword}, '%') 
+                     OR content LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+        </where>
+        ORDER BY id DESC
+        LIMIT #{size} OFFSET #{offset}
+    </select>
+
+    <select id="findByFaqId" parameterType="int"
+            resultType="kr.co.kosmo.project_back.admin.dto.FaqDto">
+        SELECT
+            id AS faqId,
+            title,
+            content,
+            created_at AS createdAt,
+            updated_at AS updatedAt
+        FROM bg_faq
+        WHERE id = #{faqId}
+    </select>
+
+    <insert id="insertFaq" parameterType="kr.co.kosmo.project_back.admin.dto.FaqDto"
+            useGeneratedKeys="true" keyProperty="faqId">
+        INSERT INTO bg_faq (title, content)
+        VALUES (#{title}, #{content})
+    </insert>
+
+    <update id="updateFaq" parameterType="kr.co.kosmo.project_back.admin.dto.FaqDto">
+        UPDATE bg_faq
+        SET title = #{title},
+            content = #{content}
+        WHERE id = #{faqId}
+    </update>
+
+    <delete id="deleteFaq" parameterType="int">
+        DELETE FROM bg_faq WHERE id = #{faqId}
+    </delete>
+
+</mapper>
+

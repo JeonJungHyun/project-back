@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 package kr.co.kosmo.project_back;
 
 import org.junit.jupiter.api.Test;
@@ -11,3 +12,15 @@ class ProjectBackApplicationTests {
 	}
 
 }
+=======
+package kr.co.kosmo.project_back;
+
+import org.springframework.boot.test.context.SpringBootTest;
+
+@SpringBootTest
+class ProjectBackApplicationTests {
+
+
+
+}
+>>>>>>> dev

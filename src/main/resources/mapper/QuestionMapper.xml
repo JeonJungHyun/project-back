@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.kosmo.project_back.question.mapper.QuestionMapper">
+
+    <!-- 1:1 문의 조회 -->
+    <select id="findQuestionByUserId"
+            resultType="kr.co.kosmo.project_back.question.dto.QuestionResponseDto">
+        SELECT
+            q.id                    AS questionId,
+            q.user_id               AS userId,
+            q.product_id            AS productId,
+            q.title                 AS title,
+            q.content               AS content,
+            q.question_status       AS questionStatus,
+            q.type                  AS type,
+            q.created_at            AS createdAt 
+        FROM bg_question q 
+        WHERE q.user_id = #{userId} 
+         <!-- 답변/미답변 필터 -->
+        <if test="status != null and status != ''">
+            AND q.question_status = #{status}
+        </if>
+
+        <!-- 문의 카테고리 필터 -->
+        <if test="type != null and type != ''">
+            AND q.type = #{type} 
+        </if>
+        ORDER BY q.created_at DESC
+    </select>
+
+    <!-- 문의 작성 -->
+    <insert id="insertQuestion"
+            parameterType="kr.co.kosmo.project_back.question.dto.QuestionRequestDto">
+        INSERT INTO bg_question (
+            user_id,
+            product_id,
+            title,
+            content,
+            type,
+            question_status,
+            created_at
+        ) VALUES (
+            #{userId},
+            #{productId},
+            #{title},
+            #{content},
+            #{type},
+            '미답변',
+            CURRENT_TIMESTAMP
+        );
+        <selectKey keyProperty="questionId"
+                    resultType="int"
+                    order="AFTER">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+    </insert>
+
+    <select id="searchProductOrOrder" resultType="map">
+        SELECT DISTINCT
+            p.id AS productId,
+            p.product_name AS productName,
+            'PRODUCT' AS type,
+            NULL AS orderNo
+        FROM bg_product p
+        WHERE p.product_name LIKE CONCAT('%', #{keyword}, '%')
+        
+        UNION ALL
+
+        /* 사용자의 주문 번호 및 해당 주문의 상품 검색 */
+        SELECT 
+            p.id AS productId,
+            p.product_name AS productName,
+            'ORDER' AS type,
+            'ORD-' || o.id AS orderNo
+        FROM bg_order o
+        JOIN bg_order_item oi ON o.id = oi.order_id
+        JOIN bg_product p ON oi.product_id = p.id
+        WHERE o.user_id = #{userId}
+        AND ('ORD-' || o.id LIKE CONCAT('%', #{keyword}, '%') 
+            OR p.product_name LIKE CONCAT('%', #{keyword}, '%'))
+        LIMIT 15
+    </select>
+
+    <!-- 회원 탈퇴 -->
+    <select id="findQuestionIdsByUserId" parameterType="int" resultType="long">
+        SELECT id 
+        FROM bg_question
+        WHERE user_id = #{userId}     
+    </select>
+    <delete id="deleteByUserId" parameterType="int">
+        DELETE FROM bg_question
+        WHERE user_id = #{userId}
+    </delete>
+
+    <!-- 문의한 유저 아이디 찾기  -->
+    <select id="findUserIdByQuestionId"
+            parameterType="int"
+            resultType="int">
+        SELECT user_id 
+        FROM bg_question
+        WHERE id = #{questionId} 
+    </select>
+
+    <select id="findAnswerByQuestionId" resultType="kr.co.kosmo.project_back.admin.dto.QuestionAnswerDto">
+        SELECT 
+            question_id as questionid,
+            content
+        FROM bg_answer
+        WHERE question_id = #{questionId}
+    </select>
+
+</mapper>

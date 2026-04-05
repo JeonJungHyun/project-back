@@ -1,0 +1,70 @@
+package kr.co.kosmo.project_back.question.controller;
+
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import jakarta.servlet.http.HttpSession;
+import kr.co.kosmo.project_back.question.dto.QuestionRequestDto;
+import kr.co.kosmo.project_back.question.dto.QuestionResponseDto;
+import kr.co.kosmo.project_back.question.service.QuestionService;
+import lombok.RequiredArgsConstructor;
+
+@RestController
+@RequestMapping("/api/v1/users/inquiries")
+@RequiredArgsConstructor
+public class QuestionController {
+    private final QuestionService questionService;
+
+    // 내 문의 목록 조회
+    @GetMapping
+    public ResponseEntity<List<QuestionResponseDto>> getQuestions(
+            HttpSession session,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String type
+            // 조회 조건이므로 RequestParam 사용
+    ) {
+        Integer userId = (Integer) session.getAttribute("LOGIN_USER");    
+        if(userId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        List<QuestionResponseDto> result = questionService.getQuestionList(userId, status, type);
+        return ResponseEntity.ok(result);
+    }
+
+    // 문의 작성
+    @PostMapping
+    public ResponseEntity<QuestionResponseDto> insertQuestion(
+        @ModelAttribute QuestionRequestDto dto,
+        // 문의 작성에는 이미지 파일이 포함되므로 Model을 사용
+        HttpSession session
+    ) {
+        Integer userId = (Integer) session.getAttribute("LOGIN_USER");
+            if(userId == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
+            questionService.insertQuestion(userId, dto);
+            return ResponseEntity.status(HttpStatus.CREATED).build(); 
+    }
+
+    @GetMapping("/search-products")
+    public ResponseEntity<List<Map<String, Object>>> searchProducts(
+            HttpSession session,
+            @RequestParam String keyword
+    ) {
+        Integer userId = (Integer) session.getAttribute("LOGIN_USER");
+        if(userId == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        
+        // Service에 keyword와 userId를 전달하여 검색 결과 반환
+        List<Map<String, Object>> results = questionService.searchProducts(userId, keyword);
+        return ResponseEntity.ok(results);
+    }
+}

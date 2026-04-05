@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.kosmo.project_back.cart.mapper.CartMapper">
+
+    <!-- 장바구니 항목 조회 -->
+    <select id="findCartListByUserId" resultType="kr.co.kosmo.project_back.cart.dto.CartDto">
+        SELECT 
+            c.id              AS cartItemId,
+            c.product_id      AS productId,
+            p.product_name    AS productName,
+            c.quantity,
+            p.price
+        FROM bg_cart c
+        JOIN bg_product p ON c.product_id = p.id 
+        WHERE c.user_id = #{userId}        
+    </select>
+
+    <!-- 장바구니 추가 -->
+    <insert id="insertCartItem">
+        INSERT INTO bg_cart (user_id, product_id, quantity, added_at)
+        VALUES (#{userId}, #{productId}, #{quantity}, NOW())
+    </insert>
+
+    <!-- 수량 수정 -->
+    <update id="updateCartItemByCartItemId"
+        parameterType="kr.co.kosmo.project_back.cart.dto.CartDto"> 
+        UPDATE bg_cart
+        SET quantity = #{quantity}
+        WHERE id = #{cartItemId}
+            AND user_id = #{userId}
+    </update>
+
+    <!-- 장바구니 항목 삭제(단건) -->
+    <delete id="deleteCartItem">
+        DELETE FROM bg_cart
+        WHERE user_id = #{userId}
+            AND product_id = #{productId}
+    </delete>
+
+    <!-- 장바구니 전체 삭제 -->
+    <delete id="deleteCart">
+        DELETE FROM bg_cart
+        WHERE user_id = #{userId}
+    </delete>
+
+    <!-- 회원 탈퇴 -->
+    <delete id="deleteByUserId" parameterType="int">
+        DELETE FROM bg_cart
+        WHERE user_id = #{userId}
+    </delete>
+
+</mapper>
+
+

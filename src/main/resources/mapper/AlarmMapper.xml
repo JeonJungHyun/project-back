@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.kosmo.project_back.alarm.mapper.AlarmMapper">
+
+    <!-- 알림 조회 -->
+    <select id="findAlarmsByUserId"
+            parameterType="int"
+            resultType="kr.co.kosmo.project_back.alarm.dto.AlarmDto">
+        SELECT
+            id,
+            user_id     AS userId,
+            type,
+            message,
+            is_read     AS isRead,
+            created_at  AS createdAt
+        FROM Bg_Alarm
+        WHERE user_id = #{userId}
+        ORDER BY id DESC
+    </select>
+
+    <!-- 알림 삭제 -->
+    <delete id="deleteAlarm" parameterType="int">
+        DELETE FROM bg_alarm
+        WHERE id = #{alarmId} 
+    </delete>
+    
+    <!-- 알림 생성 -->
+    <insert id="insertAlarm" parameterType="kr.co.kosmo.project_back.alarm.dto.AlarmDto">
+        INSERT INTO bg_alarm (user_id, type, message, is_read, created_at)
+        VALUES (#{userId}, #{type}, #{message}, 0, NOW())
+    </insert>
+
+    <!-- 알림 설정 조회 -->
+    <select id="findSettingsByUserId"
+            parameterType="int"
+            resultType="kr.co.kosmo.project_back.alarm.dto.AlarmSettingDto">
+        SELECT 
+            id                  AS userId,
+            order_is_read       AS isOrderEnabled,
+            delivery_is_read    AS isDeliveryEnabled,
+            inquery_is_read     AS isAnswerEnabled
+        FROM bg_user
+        WHERE id = #{userId} 
+    </select>
+
+    <!-- 알림 설정 수정 -->
+    <update id="updateSettings"
+            parameterType="kr.co.kosmo.project_back.alarm.dto.AlarmSettingDto">
+        UPDATE bg_user
+        SET 
+            order_is_read       = #{isOrderEnabled},
+            delivery_is_read    = #{isDeliveryEnabled},
+            inquery_is_read     = #{isAnswerEnabled} 
+        WHERE id = #{userId} 
+    </update>
+
+    <!-- 알림 읽음 처리 -->
+    <update id="updateReadStatus">
+        UPDATE bg_alarm
+        SET is_read = 1
+        WHERE id = #{alarmId}
+    </update>
+
+    <!-- 알림 전체 읽음 처리 -->
+    <update id="updateAllReadStatus">
+        UPDATE bg_alarm
+        SET is_read = 1 
+        WHERE user_id = #{userId} 
+            AND is_read = 0 
+    </update>
+
+</mapper>

@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.kosmo.project_back.review.mapper.ReviewMapper">
+
+    <resultMap id="ReviewResultMap" type="kr.co.kosmo.project_back.review.dto.response.ReviewResponseDto">
+        <id property="reviewId" column="reviewId"/>
+        <result property="userId" column="userId"/>
+        <result property="content" column="content"/>
+        <result property="rating" column="rating"/>
+        <result property="createdAt" column="createdAt"/>
+        <collection property="reviewImages" ofType="kr.co.kosmo.project_back.review.dto.response.ReviewImageDto">
+            <id property="reviewImageId" column="reviewImageId"/>
+            <result property="imageUrl" column="imageUrl"/>
+        </collection>
+    </resultMap>
+
+    <!-- 상품별 리뷰 조회 -->
+    <select id="findReviewsByProductId"
+            resultMap="ReviewResultMap">
+        SELECT 
+            r.id          AS reviewId,
+            r.user_id     AS userId,
+            r.content,
+            r.rating,
+            r.created_at  AS createdAt, 
+            ri.id         AS reviewImageId,
+            ri.image_url  AS imageUrl,
+            (SELECT COUNT(*) FROM bg_review_image WHERE review_id = r.id) AS imageCount
+        FROM bg_review r
+        LEFT JOIN bg_review_image ri
+            ON r.id = ri.review_id
+        WHERE r.product_id = #{productId}
+        ORDER BY 
+        <choose>
+            <when test="sort == 'rating_desc'">
+                r.rating DESC, r.created_at DESC </when>
+            <when test="sort == 'rating_asc'">
+                r.rating ASC, r.created_at DESC  </when>
+            <when test="sort == 'photo'">
+                imageCount DESC, r.created_at DESC </when>
+            <otherwise>
+                r.created_at DESC </otherwise>
+        </choose>
+    </select>
+
+    <!-- 리뷰 작성 -->
+    <insert id="insertReview"
+            parameterType="kr.co.kosmo.project_back.review.dto.request.ReviewRequestDto"
+            useGeneratedKeys="true"
+            keyProperty="reviewId">
+        INSERT INTO bg_review (
+            user_id,
+            product_id,
+            content,
+            rating,
+            created_at
+        )
+        VALUES (
+            #{userId},
+            #{productId},
+            #{content},
+            #{rating},
+            CURRENT_TIMESTAMP
+        )
+    </insert>
+
+    <!-- 리뷰 수정 -->
+    <update id="updateReview"
+            parameterType="kr.co.kosmo.project_back.review.dto.request.ReviewRequestDto">
+        UPDATE bg_review
+        SET
+            content = #{content},
+            rating = #{rating},
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = #{reviewId}
+    </update>
+
+    <!-- 리뷰 삭제 -->
+    <delete id="deleteReview"
+            parameterType="kr.co.kosmo.project_back.review.dto.request.ReviewRequestDto">
+        DELETE FROM bg_review
+        WHERE id = #{reviewId}
+    </delete>
+
+    <!-- 리뷰(1) - 리뷰이미지(N) 결과를 하나의 객체 + 리스트로 묶기 위함 -->
+    <resultMap id="MyReviewResultMap"
+            type="kr.co.kosmo.project_back.review.dto.response.MyReviewResponseDto">
+        
+        <id property="reviewId" column="review_id"/>
+        <result property="content" column="content"/>
+        <result property="rating" column="rating"/>
+        <result property="createdAt" column="created_at"/>
+
+        <result property="productId" column="product_id"/>
+        <result property="productName" column="product_name"/>
+        <result property="productImage" column="product_image"/>
+
+  
+        <collection property="reviewImages"
+            ofType="kr.co.kosmo.project_back.review.dto.response.ReviewImageDto">
+        <id property="reviewImageId" column="review_image_id"/>
+        <result property="imageUrl" column="image_url"/>
+        </collection>
+
+    </resultMap>
+
+    <select id="findReviewsByUserId" resultMap="MyReviewResultMap">
+
+        SELECT
+            r.id                AS review_id,
+            r.content,
+            r.rating,
+            r.created_at,
+
+            p.id                AS product_id,
+            p.product_name      AS product_name,
+            p.image_url         AS product_image,
+
+            ri.id               AS review_image_id,
+            ri.image_url        AS image_url
+
+        FROM bg_review r
+        JOIN bg_product p 
+            ON r.product_id = p.id 
+        LEFT JOIN bg_review_image ri 
+            ON r.id = ri.review_id 
+
+        WHERE r.user_id = #{userId} 
+        ORDER BY r.created_at DESC
+    </select>
+
+    <!-- 회원 탈퇴 -->
+    <select id="findReviewIdsByUserId" parameterType="int" resultType="long">
+        SELECT id
+        FROM bg_review
+        WHERE user_id = #{userId} 
+    </select>
+
+    <delete id="deleteByUserId" parameterType="int">
+        DELETE FROM bg_review
+        WHERE user_id = #{userId}
+    </delete>
+
+</mapper>
+
+

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.kosmo.project_back.admin.mapper.AdminDashboardMapper">
+
+    <select id="getTotalCounts" resultType="kr.co.kosmo.project_back.admin.dto.DashboardDto">
+        SELECT
+            (SELECT COUNT(*) FROM bg_user) AS totalUserCount,
+            (SELECT COUNT(*) FROM bg_product) AS totalProductCount,
+            (SELECT COUNT(*) FROM bg_order) AS totalOrderCount,
+            (SELECT COALESCE(SUM(payment_price), 0) FROM bg_order) AS totalSalesAmount
+    </select>
+
+</mapper>
