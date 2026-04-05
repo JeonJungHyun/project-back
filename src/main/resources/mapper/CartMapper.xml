@@ -25,7 +25,8 @@
     </insert>
 
     <!-- 수량 수정 -->
-    <update id="updateCartItemByCartItemId"> 
+    <update id="updateCartItemByCartItemId"
+        parameterType="kr.co.kosmo.project_back.cart.dto.CartDto"> 
         UPDATE bg_cart
         SET quantity = #{quantity}
         WHERE id = #{cartItemId}

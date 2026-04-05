@@ -22,18 +22,10 @@ public class CartService {
     // 장바구니 추가
     public void addCartItem(CartDto dto) {
          cartMapper.insertCartItem(dto);
-        }    
+    }    
     // 수정
-    public void updateCartItem(
-            Integer userId,
-            Integer cartItemId,
-            Integer quantity
-    ) {
-        Map<String, Object> params = new HashMap<>();   // 여러개의 값을 하나로 묶어서 SQL로 보내기 위함
-        params.put("userId", userId);
-        params.put("cartItemId", cartItemId);
-        params.put("quantity", quantity);
-        cartMapper.updateCartItemByCartItemId(params);
+    public void updateCartItem(CartDto dto) {
+        cartMapper.updateCartItemByCartItemId(dto);
     }
     // 장바구니 항목 삭제(단건)
     public void removeCartItem(Integer userId, Integer productId) {

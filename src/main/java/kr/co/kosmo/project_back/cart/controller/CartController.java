@@ -56,18 +56,24 @@ public class CartController {
     @PatchMapping("/{cartId}/quantity")
     public Map<String, Object> updateCartItem(
             @PathVariable Integer cartId,
-            @RequestBody Map<String, Integer> body,
+            @RequestBody CartDto dto,
             HttpSession session
     ) {
         Integer userId = (Integer) session.getAttribute("LOGIN_USER");
         if (userId == null) {
             throw new IllegalStateException("로그인이 필요합니다.");
         }
-        cartService.updateCartItem(userId, cartId, body.get("quantity"));
+        dto.setUserId(userId);
+        dto.setCartItemId(cartId);
+
+        cartService.updateCartItem(dto);
+
         return Map.of(
             "message", "장바구니에 수량 수정됨",
-            "cartItemId", cartId);
+            "cartItemId", cartId
+        );
     }
+
     // 장바구니 항목 삭제(단건)
     @DeleteMapping("/{productId}")
     public Map<String, Object> removeCartItem(
